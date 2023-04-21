@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>PDF Word Counter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+  </head>
+  <body>
+    <label for="pdf-file">Choose a PDF file:</label>
+    <input type="file" id="pdf-file" accept="application/pdf" /><br />
+    <label for="word1">Word 1:</label>
+    <input type="text" id="word1" /><br />
+    <label for="word2">Word 2:</label>
+    <input type="text" id="word2" /><br />
+    <label for="word3">Word 3:</label>
+    <input type="text" id="word3" /><br />
+    <button id="count-btn">Count Words</button>
+    <div id="result"></div>
+    <script>
+      const pdfFile = document.getElementById("pdf-file");
+      const word1 = document.getElementById("word1");
+      const word2 = document.getElementById("word2");
+      const word3 = document.getElementById("word3");
+      const countBtn = document.getElementById("count-btn");
+      const resultDiv = document.getElementById("result");
+
+      countBtn.addEventListener("click", async () => {
+        const file = pdfFile.files[0];
+        const pdfData = new Uint8Array(await file.arrayBuffer());
+        const pdfDoc = await pdfjsLib.getDocument({ data: pdfData });
+        let word1Count = 0;
+        let word2Count = 0;
+        let word3Count = 0;
+        for (let i = 1; i <= pdfDoc.numPages; i++) {
+          const page = await pdfDoc.getPage(i);
+          const content = await page.getTextContent();
+          const text = content.items.map((item) => item.str).join(" ");
+          const regex1 = new RegExp(`\\b${word1.value}\\b`, "gi");
+          const regex2 = new RegExp(`\\b${word2.value}\\b`, "gi");
+          const regex3 = new RegExp(`\\b${word3.value}\\b`, "gi");
+          const matches1 = text.match(regex1);
+          const matches2 = text.match(regex2);
+          const matches3 = text.match(regex3);
+          if (matches1) {
+            word1Count += matches1.length;
+          }
+          if (matches2) {
+            word2Count += matches2.length;
+          }
+          if (matches3) {
+            word3Count += matches3.length;
+          }
+        }
+        resultDiv.innerHTML = `
+          <p>Word "${word1.value}" appears ${word1Count} times.</p>
+          <p>Word "${word2.value}" appears ${word2Count} times.</p>
+          <p>Word "${word3.value}" appears ${word3Count} times.</p>
+        `;
+      });
+    </script>
+  </body>
+</html>
